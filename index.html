@@ -194,6 +194,9 @@
   .module-rate-item.bad { background: var(--highlight-light); }
   .module-rate-item.bad .mr-rate { color: var(--highlight); }
 
+  /* 导入文件 */
+  #importDropZone:hover { border-color: var(--primary) !important; background: var(--primary-light) !important; }
+
   /* 番茄钟 */
   .pomodoro { text-align: center; padding: 30px 20px; }
   .pomo-time { font-size: 56px; font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums; margin: 20px 0; }
@@ -392,6 +395,7 @@
     <div class="tab" onclick="switchTab('flashcard', this)">🧠 记忆卡片</div>
     <div class="tab" onclick="switchTab('exam', this)">⏰ 考试日程</div>
     <div class="tab" onclick="switchTab('game', this)">🎮 词语消消乐</div>
+    <div class="tab" onclick="switchTab('import', this)">📥 导入文件</div>
     <div class="tab" onclick="switchTab('stats', this)">📈 数据统计</div>
   </div>
 
@@ -675,6 +679,30 @@
     </div>
   </div>
 
+  <!-- ==================== 导入文件 ==================== -->
+  <div class="module" id="import">
+    <div class="card">
+      <div class="card-header"><div class="card-title"><div class="card-icon">📥</div>导入文件 · 批量生成</div></div>
+      <div style="background:var(--primary-light);padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;color:var(--primary)">
+        💡 支持 PDF、Word、Excel、TXT 文件。上传后自动解析内容，可批量导入到<strong>词语辨析</strong>、<strong>记忆卡片</strong>、<strong>错题本</strong>、<strong>日常积累</strong>
+      </div>
+
+      <!-- 文件上传区 -->
+      <div id="importDropZone" style="border:2px dashed var(--border);border-radius:12px;padding:30px;text-align:center;cursor:pointer;transition:all 0.2s">
+        <div style="font-size:40px;margin-bottom:8px">📄</div>
+        <div style="font-size:14px;color:var(--text)">点击选择文件 或拖拽文件到此处</div>
+        <div style="font-size:12px;color:var(--text-sub);margin-top:4px">支持 .pdf .docx .xlsx .txt</div>
+        <input type="file" id="importFileInput" accept=".pdf,.docx,.xlsx,.txt" style="display:none" onchange="handleImportFile(this)">
+      </div>
+
+      <!-- 解析状态 -->
+      <div id="importStatus" style="margin-top:16px;display:none"></div>
+
+      <!-- 解析结果 -->
+      <div id="importResult" style="margin-top:16px;display:none"></div>
+    </div>
+  </div>
+
   <!-- ==================== 数据统计 ==================== -->
   <div class="module" id="stats">
     <div class="card">
@@ -711,6 +739,7 @@
   <div class="nav-item" onclick="switchTab('flashcard', this)" data-id="flashcard"><span class="nav-icon">🧠</span><span>记忆</span></div>
   <div class="nav-item" onclick="switchTab('exam', this)" data-id="exam"><span class="nav-icon">⏰</span><span>日程</span></div>
   <div class="nav-item" onclick="switchTab('game', this)" data-id="game"><span class="nav-icon">🎮</span><span>消乐</span></div>
+  <div class="nav-item" onclick="switchTab('import', this)" data-id="import"><span class="nav-icon">📥</span><span>导入</span></div>
   <div class="nav-item" onclick="switchTab('pomo', this)" data-id="pomo"><span class="nav-icon">🍅</span><span>专注</span></div>
   <div class="nav-item" onclick="switchTab('stats', this)" data-id="stats"><span class="nav-icon">📈</span><span>统计</span></div>
 </nav>
@@ -845,7 +874,8 @@ const MODULES = [
   { id: 'score', label: '📊 模考成绩' }, { id: 'pomo', label: '🍅 番茄钟' },
   { id: 'experience', label: '💡 经验总结' },
   { id: 'flashcard', label: '🧠 记忆卡片' }, { id: 'exam', label: '⏰ 考试日程' },
-  { id: 'game', label: '🎮 词语消消乐' }, { id: 'stats', label: '📈 数据统计' }
+  { id: 'game', label: '🎮 词语消消乐' }, { id: 'import', label: '📥 导入文件' },
+  { id: 'stats', label: '📈 数据统计' }
 ];
 let currentModuleIdx = 0;
 
@@ -1398,6 +1428,231 @@ function init() {
   updateAllStats();
 }
 init();
+
+// ===== 文件导入功能 =====
+let parsedItems = []; // 解析后的条目
+
+// 拖拽上传
+const dropZone = document.getElementById('importDropZone');
+if (dropZone) {
+  dropZone.addEventListener('click', () => document.getElementById('importFileInput').click());
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--primary)'; dropZone.style.background = 'var(--primary-light)'; });
+  dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--border)'; dropZone.style.background = ''; });
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.style.borderColor = 'var(--border)'; dropZone.style.background = '';
+    if (e.dataTransfer.files.length) handleImportFile({ files: e.dataTransfer.files, value: '' });
+  });
+}
+
+async function handleImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusDiv = document.getElementById('importStatus');
+  const resultDiv = document.getElementById('importResult');
+  statusDiv.style.display = 'block'; resultDiv.style.display = 'none';
+  statusDiv.innerHTML = '<div style="padding:16px;text-align:center;color:var(--primary)">⏳ 正在解析文件...</div>';
+  parsedItems = [];
+
+  try {
+    const ext = file.name.split('.').pop().toLowerCase();
+    let text = '';
+    if (ext === 'pdf') {
+      text = await parsePDF(file);
+    } else if (ext === 'docx') {
+      text = await parseDOCX(file);
+    } else if (ext === 'xlsx') {
+      text = await parseXLSX(file);
+    } else if (ext === 'txt') {
+      text = await file.text();
+    } else {
+      throw new Error('不支持的文件格式');
+    }
+    // 智能解析
+    parsedItems = smartParse(text);
+    showImportResult(parsedItems, file.name);
+  } catch (e) {
+    statusDiv.innerHTML = `<div style="padding:16px;color:var(--accent);font-size:13px">❌ 解析失败：${escapeHtml(e.message)}</div>`;
+  }
+}
+
+// PDF 解析（用 pdf.js）
+async function parsePDF(file) {
+  if (!window.pdfjsLib) {
+    window.pdfjsLib = await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(item => item.str).join(' ') + '\n';
+  }
+  return text;
+}
+
+// Word 解析（用 mammoth.js）
+async function parseDOCX(file) {
+  if (!window.mammoth) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+  }
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await window.mammoth.extractRawText({ arrayBuffer });
+  return result.value;
+}
+
+// Excel 解析（用 SheetJS）
+async function parseXLSX(file) {
+  if (!window.XLSX) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+  }
+  const arrayBuffer = await file.arrayBuffer();
+  const wb = window.XLSX.read(arrayBuffer, { type: 'array' });
+  let text = '';
+  wb.SheetNames.forEach(name => {
+    const ws = wb.Sheets[name];
+    text += window.XLSX.utils.sheet_to_csv(ws) + '\n';
+  });
+  return text;
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = () => resolve(window); s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// 智能解析文本，自动识别格式
+function smartParse(text) {
+  const items = [];
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+
+  // 模式1：词语 - 释义 / 词语：释义 / 词语：解释
+  const wordPattern = /^([^\s:：\-—、]{2,8})\s*[:：\-—]\s*(.+)$/;
+  // 模式2：题干？答案 / A？B
+  const qaPattern = /^(.{5,})[?？]\s*(.+)$/;
+  // 模式3：Excel CSV 格式 "词语","释义"
+  const csvPattern = /^"?(.+?)"?\s*[,，\t]\s*"?(.+?)"?$/;
+
+  let detectedType = 'unknown';
+  let matchCount = 0;
+
+  lines.forEach(line => {
+    let m = line.match(wordPattern);
+    if (m && m[2].length > 2) {
+      items.push({ type: 'word', front: m[1], back: m[2] });
+      matchCount++;
+      return;
+    }
+    m = line.match(qaPattern);
+    if (m) {
+      items.push({ type: 'qa', front: m[1] + '?', back: m[2] });
+      matchCount++;
+      return;
+    }
+    m = line.match(csvPattern);
+    if (m && m[1].length >= 2 && m[2].length >= 2) {
+      items.push({ type: 'word', front: m[1], back: m[2] });
+      matchCount++;
+      return;
+    }
+  });
+
+  // 判断主要类型
+  if (matchCount === 0) {
+    // 没匹配到结构化格式，按段落分割作为积累素材
+    lines.forEach(line => {
+      if (line.length > 5) items.push({ type: 'material', front: line, back: '' });
+    });
+  }
+
+  return items;
+}
+
+function showImportResult(items, filename) {
+  const statusDiv = document.getElementById('importStatus');
+  const resultDiv = document.getElementById('importResult');
+  statusDiv.style.display = 'none';
+  resultDiv.style.display = 'block';
+
+  if (!items.length) {
+    resultDiv.innerHTML = '<div style="padding:16px;color:var(--accent)">未识别到可导入的内容，请检查文件格式</div>';
+    return;
+  }
+
+  const words = items.filter(i => i.type === 'word');
+  const qas = items.filter(i => i.type === 'qa');
+  const materials = items.filter(i => i.type === 'material');
+
+  let html = `<div style="margin-bottom:16px">
+    <div style="font-weight:600;margin-bottom:8px">📄 ${escapeHtml(filename)} 解析完成</div>
+    <div style="font-size:13px;color:var(--text-sub)">共识别 ${items.length} 条内容：
+  `;
+  if (words.length) html += `词语释义 ${words.length} 条；`;
+  if (qas.length) html += `问答 ${qas.length} 条；`;
+  if (materials.length) html += `素材 ${materials.length} 条`;
+  html += '</div></div>';
+
+  // 预览前10条
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:8px">📋 内容预览（前10条）</div><div style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px">';
+  items.slice(0, 10).forEach((item, i) => {
+    const typeLabel = { word: '词语', qa: '问答', material: '素材' }[item.type];
+    html += `<div style="padding:6px 0;border-bottom:1px solid #f0f0f0"><span style="font-size:11px;color:var(--text-sub);margin-right:6px">[${typeLabel}]</span><strong>${escapeHtml(item.front)}</strong>${item.back ? ` → ${escapeHtml(item.back).substring(0, 60)}` : ''}</div>`;
+  });
+  html += '</div>';
+
+  // 导入按钮
+  html += '<div style="margin-top:16px"><div style="font-weight:600;margin-bottom:8px">选择导入到哪个板块：</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
+  if (words.length) {
+    html += `<button onclick="doImport('word')" style="padding:10px 16px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">📖 导入词语辨析 (${words.length})</button>`;
+    html += `<button onclick="doImport('flashcard_word')" style="padding:10px 16px;background:var(--gold);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">🧠 导入记忆卡片 (${words.length})</button>`;
+  }
+  if (qas.length) {
+    html += `<button onclick="doImport('flashcard_qa')" style="padding:10px 16px;background:var(--gold);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">🧠 导入问答卡片 (${qas.length})</button>`;
+    html += `<button onclick="doImport('error')" style="padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">❌ 导入错题本 (${qas.length})</button>`;
+  }
+  if (materials.length) {
+    html += `<button onclick="doImport('material')" style="padding:10px 16px;background:#3498db;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">✨ 导入日常积累 (${materials.length})</button>`;
+  }
+  html += '</div></div>';
+
+  resultDiv.innerHTML = html;
+}
+
+function doImport(target) {
+  let count = 0;
+  if (target === 'word') {
+    parsedItems.filter(i => i.type === 'word').forEach(item => {
+      data.words.unshift({ id: Date.now() + count, word: item.front, explain: item.back, compare: '', photos: [], date: today() });
+      count++;
+    });
+    saveData(); renderWords();
+  } else if (target === 'flashcard_word' || target === 'flashcard_qa') {
+    const type = target === 'flashcard_word' ? 'word' : 'qa';
+    parsedItems.filter(i => i.type === type).forEach(item => {
+      data.flashcards.unshift({ id: Date.now() + count, front: item.front, back: item.back, status: 'review', photos: [], date: today() });
+      count++;
+    });
+    saveData(); renderFlashcards();
+  } else if (target === 'error') {
+    parsedItems.filter(i => i.type === 'qa').forEach(item => {
+      data.errors.unshift({ id: Date.now() + count, title: item.front, reason: item.back, status: 'new', photos: [], date: today() });
+      count++;
+    });
+    saveData(); renderErrors();
+  } else if (target === 'material') {
+    parsedItems.filter(i => i.type === 'material').forEach(item => {
+      data.news.unshift({ id: Date.now() + count, text: item.front, photos: [], date: today() });
+      count++;
+    });
+    saveData(); renderAccumulate();
+  }
+  alert(`✅ 成功导入 ${count} 条到对应板块！`);
+  document.getElementById('importResult').innerHTML = `<div style="padding:20px;text-align:center;color:var(--primary)">✅ 成功导入 ${count} 条！可到对应板块查看</div>`;
+}
 
 // ===== SW 注册 =====
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
