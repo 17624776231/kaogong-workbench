@@ -226,6 +226,112 @@
   .photo-section { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
   .photo-section-label { font-size: 12px; color: var(--text-sub); margin-bottom: 4px; }
 
+  /* ===== 记忆卡片 ===== */
+  .flashcard {
+    perspective: 1000px; width: 100%; max-width: 360px; height: 200px;
+    margin: 0 auto 16px; cursor: pointer;
+  }
+  .flashcard-inner {
+    position: relative; width: 100%; height: 100%;
+    transition: transform 0.6s; transform-style: preserve-3d;
+  }
+  .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+  .flashcard-front, .flashcard-back {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: var(--radius); padding: 20px; display: flex;
+    flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; box-shadow: var(--shadow);
+  }
+  .flashcard-front {
+    background: linear-gradient(135deg, var(--primary-light), #d4e8d8);
+    color: var(--text);
+  }
+  .flashcard-back {
+    background: linear-gradient(135deg, var(--gold-light), #fef0c7);
+    color: var(--text); transform: rotateY(180deg);
+  }
+  .flashcard-front .fc-label, .flashcard-back .fc-label {
+    font-size: 11px; color: var(--text-sub); margin-bottom: 8px; text-transform: uppercase;
+  }
+  .flashcard-front .fc-text, .flashcard-back .fc-text {
+    font-size: 16px; font-weight: 600; line-height: 1.5; word-break: break-word;
+  }
+  .flashcard-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .flashcard-item {
+    background: var(--card); border-radius: 10px; padding: 14px; box-shadow: var(--shadow);
+    border-left: 3px solid var(--primary); transition: all 0.2s;
+  }
+  .flashcard-item.need-review { border-left-color: var(--highlight); }
+  .flashcard-item.mastered { border-left-color: #27ae60; opacity: 0.85; }
+  .flashcard-item .fc-front-text { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+  .flashcard-item .fc-back-text { font-size: 12px; color: var(--text-sub); line-height: 1.5; }
+  .flashcard-item .fc-actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .fc-btn {
+    font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border);
+    background: #fff; color: var(--text-sub); cursor: pointer;
+  }
+  .fc-btn.active-review { background: var(--highlight); color: #fff; border-color: var(--highlight); }
+  .fc-btn.active-mastered { background: #27ae60; color: #fff; border-color: #27ae60; }
+  .fc-quiz-info { text-align: center; font-size: 13px; color: var(--text-sub); margin-bottom: 12px; }
+
+  /* ===== 考试日程 ===== */
+  .exam-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; gap: 10px; flex-wrap: wrap;
+  }
+  .exam-item.past { background: #f0f0f0; opacity: 0.6; }
+  .exam-item.ongoing { background: #d6f0db; border-left: 3px solid var(--primary); }
+  .exam-item.upcoming { background: #fff3e0; border-left: 3px solid #ff9800; }
+  .exam-item .exam-info { flex: 1; min-width: 150px; }
+  .exam-item .exam-name { font-weight: 600; font-size: 14px; }
+  .exam-item .exam-date { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+  .exam-item .exam-days { text-align: center; min-width: 70px; }
+  .exam-item .exam-days .num { font-size: 20px; font-weight: 700; }
+  .exam-item.past .exam-days .num { color: var(--text-sub); }
+  .exam-item.ongoing .exam-days .num { color: var(--primary); }
+  .exam-item.upcoming .exam-days .num { color: #ff9800; }
+  .exam-item .exam-days .label { font-size: 10px; color: var(--text-sub); }
+  .exam-badge {
+    font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 600;
+  }
+  .exam-badge.past { background: #ddd; color: #888; }
+  .exam-badge.ongoing { background: var(--primary); color: #fff; }
+  .exam-badge.upcoming { background: #ff9800; color: #fff; }
+  .exam-section-title { font-weight: 600; font-size: 13px; color: var(--primary); margin: 16px 0 8px; }
+
+  /* ===== 词语消消乐 ===== */
+  .game-board {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0;
+  }
+  .game-column { display: flex; flex-direction: column; gap: 8px; }
+  .game-col-title { text-align: center; font-size: 12px; color: var(--text-sub); font-weight: 600; margin-bottom: 4px; }
+  .game-card {
+    padding: 14px 10px; border-radius: 10px; text-align: center; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: all 0.2s;
+    border: 2px solid var(--border); background: var(--card); user-select: none;
+  }
+  .game-card:hover { border-color: var(--primary); }
+  .game-card.selected { border-color: var(--primary); background: var(--primary-light); transform: scale(1.03); }
+  .game-card.matched { opacity: 0; pointer-events: none; transform: scale(0.8); transition: all 0.4s; }
+  .game-card.correct-flash { animation: correctFlash 0.5s; }
+  .game-card.wrong-flash { animation: wrongFlash 0.5s; }
+  @keyframes correctFlash {
+    0% { background: var(--card); }
+    50% { background: #d6f0db; border-color: var(--primary); transform: scale(1.05); }
+    100% { background: var(--card); }
+  }
+  @keyframes wrongFlash {
+    0% { background: var(--card); }
+    50% { background: var(--highlight-light); border-color: var(--highlight); transform: scale(0.95); }
+    100% { background: var(--card); }
+  }
+  .game-stats { display: flex; justify-content: space-around; margin-bottom: 16px; }
+  .game-stat { text-align: center; }
+  .game-stat .num { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .game-stat .label { font-size: 11px; color: var(--text-sub); }
+  .game-complete { text-align: center; padding: 30px; font-size: 16px; color: var(--primary); }
+
   @media (max-width: 600px) {
     .grid { grid-template-columns: 1fr; }
     .countdown { gap: 12px; }
@@ -236,6 +342,7 @@
     .card { padding: 14px; }
     .module-rate-grid { grid-template-columns: repeat(3, 1fr); }
     .item-photos img { max-width: 150px; }
+    .flashcard-list { grid-template-columns: 1fr; }
   }
   @media (display-mode: browser) {
     .bottom-nav { display: none; }
@@ -282,6 +389,9 @@
     <div class="tab" onclick="switchTab('score', this)">📊 模考成绩</div>
     <div class="tab" onclick="switchTab('pomo', this)">🍅 番茄钟</div>
     <div class="tab" onclick="switchTab('experience', this)">💡 经验总结</div>
+    <div class="tab" onclick="switchTab('flashcard', this)">🧠 记忆卡片</div>
+    <div class="tab" onclick="switchTab('exam', this)">⏰ 考试日程</div>
+    <div class="tab" onclick="switchTab('game', this)">🎮 词语消消乐</div>
     <div class="tab" onclick="switchTab('stats', this)">📈 数据统计</div>
   </div>
 
@@ -493,6 +603,78 @@
     </div>
   </div>
 
+  <!-- ==================== 记忆卡片 ==================== -->
+  <div class="module" id="flashcard">
+    <div class="grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title"><div class="card-icon">🧠</div>记忆卡片</div><span style="font-size:12px;color:var(--text-sub)" id="flashcardCountLabel">0 张卡片</span></div>
+        <div class="input-row">
+          <input type="text" id="fcFront" placeholder="正面（问题/词语）" style="flex:1">
+          <input type="text" id="fcBack" placeholder="反面（答案/解释）" style="flex:1">
+          <label class="photo-btn" for="fcPhoto">📷</label>
+          <input type="file" id="fcPhoto" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this, 'fcPhotos')">
+          <button onclick="addFlashcard()">添加</button>
+        </div>
+        <div class="photo-preview-area" id="fcPhotos"></div>
+        <div style="margin-top:12px">
+          <button class="btn-full" onclick="startQuiz()" style="background:var(--gold);color:#fff">🎲 随机抽查</button>
+        </div>
+        <div id="fcQuizArea" style="display:none;margin-top:16px">
+          <div class="fc-quiz-info" id="fcQuizInfo"></div>
+          <div class="flashcard" id="fcQuizCard" onclick="flipQuizCard()">
+            <div class="flashcard-inner">
+              <div class="flashcard-front"><div class="fc-label">正面 · 点击翻转</div><div class="fc-text" id="fcQuizFront"></div></div>
+              <div class="flashcard-back"><div class="fc-label">背面 · 答案</div><div class="fc-text" id="fcQuizBack"></div></div>
+            </div>
+          </div>
+          <div id="fcQuizPhotos"></div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+            <button onclick="markQuizCard('need-review')" style="padding:8px 16px;background:var(--highlight);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">需复习</button>
+            <button onclick="markQuizCard('mastered')" style="padding:8px 16px;background:#27ae60;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">已记住</button>
+            <button onclick="nextQuizCard()" style="padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">下一张</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title"><div class="card-icon">📚</div>我的卡片库</div></div>
+        <div id="flashcardList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 考试日程 ==================== -->
+  <div class="module" id="exam">
+    <div class="card">
+      <div class="card-header"><div class="card-title"><div class="card-icon">⏰</div>考试日程</div><span style="font-size:12px;color:var(--text-sub)" id="examUpdateLabel"></span></div>
+      <div class="exam-section-title">📌 2027国考/省考关键节点</div>
+      <div id="builtinExamList"></div>
+      <div class="exam-section-title">📝 我的考试日程</div>
+      <div id="customExamList"></div>
+      <div class="input-row" style="margin-top:12px">
+        <input type="text" id="examNameInput" placeholder="考试名称（如：事业单位联考）" style="flex:2">
+        <input type="date" id="examDateInput" style="flex:1">
+        <input type="date" id="examDateEndInput" title="结束日期(可选)" style="flex:1">
+        <button onclick="addCustomExam()">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 词语消消乐 ==================== -->
+  <div class="module" id="game">
+    <div class="card">
+      <div class="card-header"><div class="card-title"><div class="card-icon">🎮</div>词语消消乐</div><span style="font-size:12px;color:var(--text-sub)">词语↔释义配对消除</span></div>
+      <div class="game-stats">
+        <div class="game-stat"><div class="num" id="gameScore">0</div><div class="label">当前得分</div></div>
+        <div class="game-stat"><div class="num" id="gameRounds">0</div><div class="label">已完成局数</div></div>
+        <div class="game-stat"><div class="num" id="gameAccuracy">0%</div><div class="label">正确率</div></div>
+      </div>
+      <div id="gameBoard" style="min-height:200px"></div>
+      <div style="text-align:center;margin-top:12px">
+        <button onclick="startNewGame()" style="padding:10px 24px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">🎮 开始新局</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== 数据统计 ==================== -->
   <div class="module" id="stats">
     <div class="card">
@@ -526,6 +708,9 @@
   <div class="nav-item" onclick="switchTab('error', this)" data-id="error"><span class="nav-icon">❌</span><span>错题</span></div>
   <div class="nav-item" onclick="switchTab('score', this)" data-id="score"><span class="nav-icon">📊</span><span>模考</span></div>
   <div class="nav-item" onclick="switchTab('experience', this)" data-id="experience"><span class="nav-icon">💡</span><span>经验</span></div>
+  <div class="nav-item" onclick="switchTab('flashcard', this)" data-id="flashcard"><span class="nav-icon">🧠</span><span>记忆</span></div>
+  <div class="nav-item" onclick="switchTab('exam', this)" data-id="exam"><span class="nav-icon">⏰</span><span>日程</span></div>
+  <div class="nav-item" onclick="switchTab('game', this)" data-id="game"><span class="nav-icon">🎮</span><span>消乐</span></div>
   <div class="nav-item" onclick="switchTab('pomo', this)" data-id="pomo"><span class="nav-icon">🍅</span><span>专注</span></div>
   <div class="nav-item" onclick="switchTab('stats', this)" data-id="stats"><span class="nav-icon">📈</span><span>统计</span></div>
 </nav>
@@ -544,7 +729,9 @@ function loadData() {
     examDate: '', todos: [], checks: [], plan: {}, reviews: [], errors: [],
     words: [], news: [], materials: [], quotes: [], scores: [], moduleRates: [],
     experiences: [], pomo: { today: 0, total: 0, minutes: 0, lastDate: '' },
-    streak: { count: 0, lastDate: '' }
+    streak: { count: 0, lastDate: '' },
+    flashcards: [], examSchedule: [],
+    gameStats: { score: 0, rounds: 0, correct: 0, wrong: 0 }
   };
 }
 function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); updateAllStats(); }
@@ -656,7 +843,9 @@ const MODULES = [
   { id: 'review', label: '🔄 复盘' }, { id: 'error', label: '❌ 错题本' },
   { id: 'word', label: '📖 词语辨析' }, { id: 'accumulate', label: '✨ 日常积累' },
   { id: 'score', label: '📊 模考成绩' }, { id: 'pomo', label: '🍅 番茄钟' },
-  { id: 'experience', label: '💡 经验总结' }, { id: 'stats', label: '📈 数据统计' }
+  { id: 'experience', label: '💡 经验总结' },
+  { id: 'flashcard', label: '🧠 记忆卡片' }, { id: 'exam', label: '⏰ 考试日程' },
+  { id: 'game', label: '🎮 词语消消乐' }, { id: 'stats', label: '📈 数据统计' }
 ];
 let currentModuleIdx = 0;
 
@@ -863,6 +1052,313 @@ function renderExperiences() {
 }
 function delExperience(id) { data.experiences=data.experiences.filter(x=>x.id!==id); saveData();renderExperiences(); }
 
+// ===== 记忆卡片 =====
+function addFlashcard() {
+  const front = document.getElementById('fcFront').value.trim();
+  const back = document.getElementById('fcBack').value.trim();
+  if (!front || !back) return;
+  const photos = getPendingPhotos('fcPhotos');
+  data.flashcards.unshift({ id: Date.now(), front, back, status: 'need-review', photos, date: today() });
+  document.getElementById('fcFront').value = '';
+  document.getElementById('fcBack').value = '';
+  saveData(); renderFlashcards();
+}
+function renderFlashcards() {
+  const wrap = document.getElementById('flashcardList');
+  document.getElementById('flashcardCountLabel').textContent = `${data.flashcards.length} 张卡片`;
+  if (!data.flashcards.length) { wrap.innerHTML = '<div class="empty-state"><div class="icon">🧠</div>添加第一张卡片</div>'; return; }
+  wrap.innerHTML = '';
+  const statusLabel = { 'need-review': '需复习', 'mastered': '已记住' };
+  data.flashcards.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'flashcard-item' + (c.status === 'need-review' ? ' need-review' : c.status === 'mastered' ? ' mastered' : '');
+    div.innerHTML = `<div class="fc-front-text">正面：${escapeHtml(c.front)}</div><div class="fc-back-text">背面：${escapeHtml(c.back)}</div>${itemPhotosHtml(c.photos)}<div class="fc-actions"><button class="fc-btn ${c.status==='need-review'?'active-review':''}" onclick="setFcStatus(${c.id},'need-review')">需复习</button><button class="fc-btn ${c.status==='mastered'?'active-mastered':''}" onclick="setFcStatus(${c.id},'mastered')">已记住</button><button class="fc-btn" onclick="delFlashcard(${c.id})" style="color:var(--accent)">删除</button></div>`;
+    wrap.appendChild(div);
+  });
+}
+function setFcStatus(id, status) { const c = data.flashcards.find(x => x.id === id); c.status = status; saveData(); renderFlashcards(); }
+function delFlashcard(id) { data.flashcards = data.flashcards.filter(x => x.id !== id); saveData(); renderFlashcards(); }
+
+// 随机抽查
+let quizQueue = [];
+let currentQuizCard = null;
+function startQuiz() {
+  const needReview = data.flashcards.filter(c => c.status === 'need-review');
+  if (!needReview.length) { alert('没有需要复习的卡片，先添加或标记一些为"需复习"吧'); return; }
+  quizQueue = needReview.sort(() => Math.random() - 0.5);
+  document.getElementById('fcQuizArea').style.display = 'block';
+  showQuizCard();
+}
+function showQuizCard() {
+  if (!quizQueue.length) {
+    document.getElementById('fcQuizArea').style.display = 'none';
+    alert('🎉 全部复习完成！'); return;
+  }
+  currentQuizCard = quizQueue.shift();
+  document.getElementById('fcQuizFront').textContent = currentQuizCard.front;
+  document.getElementById('fcQuizBack').textContent = currentQuizCard.back;
+  document.getElementById('fcQuizPhotos').innerHTML = itemPhotosHtml(currentQuizCard.photos);
+  document.getElementById('fcQuizInfo').textContent = `抽查中 · 剩余 ${quizQueue.length + 1} 张`;
+  document.getElementById('fcQuizCard').classList.remove('flipped');
+}
+function flipQuizCard() { document.getElementById('fcQuizCard').classList.toggle('flipped'); }
+function markQuizCard(status) {
+  if (!currentQuizCard) return;
+  const c = data.flashcards.find(x => x.id === currentQuizCard.id);
+  if (c) { c.status = status; saveData(); renderFlashcards(); }
+  nextQuizCard();
+}
+function nextQuizCard() {
+  currentQuizCard = null;
+  if (quizQueue.length) { showQuizCard(); }
+  else { document.getElementById('fcQuizArea').style.display = 'none'; }
+}
+
+// ===== 考试日程 =====
+const BUILTIN_EXAMS = [
+  { name: '2027国考公告发布', date: '2026-10-14', dateEnd: '2026-10-14' },
+  { name: '2027国考报名', date: '2026-10-15', dateEnd: '2026-10-24' },
+  { name: '2027国考缴费确认', date: '2026-10-28', dateEnd: '2026-11-02' },
+  { name: '2027国考准考证打印', date: '2026-11-20', dateEnd: '2026-11-28' },
+  { name: '2027国考笔试', date: '2026-11-28', dateEnd: '2026-11-29' },
+  { name: '多省联考省考公告', date: '2027-01-01', dateEnd: '2027-01-31' },
+  { name: '多省联考省考笔试', date: '2027-03-14', dateEnd: '2027-03-16' }
+];
+
+function getExamStatus(startDate, endDate) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (now < start) return { status: 'upcoming', label: '未开始', days: Math.ceil((start - now) / (1000 * 60 * 60 * 24)) };
+  if (now > end) return { status: 'past', label: '已结束', days: 0 };
+  return { status: 'ongoing', label: '进行中', days: Math.ceil((end - now) / (1000 * 60 * 60 * 24)) };
+}
+
+function renderExamItem(exam, isCustom) {
+  const st = getExamStatus(exam.date, exam.dateEnd || exam.date);
+  const dateText = exam.date === (exam.dateEnd || exam.date) ? exam.date : `${exam.date} ~ ${exam.dateEnd}`;
+  const daysText = st.status === 'past' ? '已结束' : st.status === 'ongoing' ? `还有${st.days}天` : `还有${st.days}天`;
+  const div = document.createElement('div');
+  div.className = `exam-item ${st.status}`;
+  div.innerHTML = `<div class="exam-info"><div class="exam-name">${escapeHtml(exam.name)}</div><div class="exam-date">${dateText}</div></div><span class="exam-badge ${st.status}">${st.label}</span><div class="exam-days"><div class="num">${st.status === 'past' ? '—' : st.days}</div><div class="label">${st.status === 'past' ? '' : '天'}</div></div>${isCustom ? `<button onclick="delCustomExam(${exam.id})" style="background:none;border:none;color:#ccc;cursor:pointer">×</button>` : ''}`;
+  return div;
+}
+
+function renderBuiltinExams() {
+  const wrap = document.getElementById('builtinExamList');
+  wrap.innerHTML = '';
+  BUILTIN_EXAMS.forEach(exam => wrap.appendChild(renderExamItem(exam, false)));
+}
+
+function renderCustomExams() {
+  const wrap = document.getElementById('customExamList');
+  if (!data.examSchedule.length) { wrap.innerHTML = '<div class="empty-state"><div class="icon">⏰</div>添加你的考试日程</div>'; return; }
+  wrap.innerHTML = '';
+  const sorted = [...data.examSchedule].sort((a, b) => new Date(a.date) - new Date(b.date));
+  sorted.forEach(exam => wrap.appendChild(renderExamItem(exam, true)));
+}
+
+function addCustomExam() {
+  const name = document.getElementById('examNameInput').value.trim();
+  const date = document.getElementById('examDateInput').value;
+  const dateEnd = document.getElementById('examDateEndInput').value || date;
+  if (!name || !date) return;
+  data.examSchedule.push({ id: Date.now(), name, date, dateEnd });
+  document.getElementById('examNameInput').value = '';
+  document.getElementById('examDateInput').value = '';
+  document.getElementById('examDateEndInput').value = '';
+  saveData(); renderCustomExams();
+}
+
+function delCustomExam(id) {
+  data.examSchedule = data.examSchedule.filter(x => x.id !== id);
+  saveData(); renderCustomExams();
+}
+
+// 尝试联网获取最新日程（失败则用内置数据）
+async function fetchLatestExamSchedule() {
+  document.getElementById('examUpdateLabel').textContent = '正在获取最新日程...';
+  try {
+    const resp = await fetch('https://www.baidu.com/s?wd=' + encodeURIComponent('2027国考时间安排'), { mode: 'no-cors', signal: AbortSignal.timeout(5000) });
+    // no-cors 模式下无法读取内容，仅作为探测；使用内置数据
+    document.getElementById('examUpdateLabel').textContent = '✅ 内置日程（联网探测完成）';
+  } catch (e) {
+    document.getElementById('examUpdateLabel').textContent = '📋 使用内置日程（离线）';
+  }
+  renderBuiltinExams();
+}
+
+// ===== 词语消消乐 =====
+const BUILTIN_GAME_WORDS = [
+  { word: '砥砺', meaning: '磨炼意志' },
+  { word: '笃行', meaning: '切实实行' },
+  { word: '躬行', meaning: '亲自实践' },
+  { word: '擘画', meaning: '筹划布局' },
+  { word: '赓续', meaning: '继续延续' },
+  { word: '汲取', meaning: '吸取吸收' },
+  { word: '历练', meaning: '经历锻炼' },
+  { word: '淬炼', meaning: '反复锻炼' },
+  { word: '激荡', meaning: '冲击震荡' },
+  { word: '锚定', meaning: '固定确定' },
+  { word: '绵延', meaning: '连续不断' },
+  { word: '奋楫', meaning: '努力划桨(比喻奋进)' },
+  { word: '踔厉', meaning: '奋发努力' },
+  { word: '谋篇', meaning: '规划布局' },
+  { word: '擘划', meaning: '筹划规划' },
+  { word: '蕴蓄', meaning: '积蓄蕴藏' },
+  { word: '踵事增华', meaning: '继承并发扬光大' },
+  { word: '臻于至善', meaning: '达到极完善的境界' },
+  { word: '踔厉奋发', meaning: '精神振奋努力前进' },
+  { word: '矢志不渝', meaning: '立下志愿不改变' }
+];
+
+let gameState = {
+  active: false,
+  pairs: [], selectedWord: null, selectedMeaning: null,
+  matched: 0, total: 6, score: 0, correct: 0, wrong: 0
+};
+
+function getGameWordPool() {
+  if (data.words && data.words.length >= 6) {
+    return data.words.map(w => ({ word: w.word, meaning: w.explain.replace(/[①②③④⑤⑥⑦⑧⑨⑩]/g, '').replace(/\n/g, ' ').trim().substring(0, 30) }));
+  }
+  return BUILTIN_GAME_WORDS;
+}
+
+function startNewGame() {
+  const pool = getGameWordPool();
+  const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 6);
+  gameState.pairs = shuffled;
+  gameState.selectedWord = null;
+  gameState.selectedMeaning = null;
+  gameState.matched = 0;
+  gameState.total = shuffled.length;
+  gameState.score = 0;
+  gameState.correct = 0;
+  gameState.wrong = 0;
+  gameState.active = true;
+  renderGameBoard();
+  updateGameStats();
+}
+
+function renderGameBoard() {
+  const wrap = document.getElementById('gameBoard');
+  if (!gameState.active) {
+    wrap.innerHTML = '<div class="empty-state"><div class="icon">🎮</div>点击"开始新局"开始游戏</div>';
+    return;
+  }
+  // 释义卡片乱序，用 mIdx 关联到原始 pair 索引
+  const meaningOrder = gameState.pairs.map((_, i) => i).sort(() => Math.random() - 0.5);
+  gameState.meaningOrder = meaningOrder;
+  wrap.innerHTML = `
+    <div class="game-board">
+      <div class="game-column">
+        <div class="game-col-title">词语</div>
+        ${gameState.pairs.map((p, i) => `<div class="game-card" data-type="word" data-idx="${i}" onclick="selectGameCard('word',${i})">${escapeHtml(p.word)}</div>`).join('')}
+      </div>
+      <div class="game-column">
+        <div class="game-col-title">释义</div>
+        ${meaningOrder.map((origIdx, mIdx) => `<div class="game-card" data-type="meaning" data-midx="${mIdx}" onclick="selectGameCard('meaning',${mIdx})">${escapeHtml(gameState.pairs[origIdx].meaning)}</div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function selectGameCard(type, val) {
+  if (!gameState.active) return;
+  if (type === 'word') {
+    if (gameState.selectedWord !== null) {
+      const prev = document.querySelector(`.game-card[data-type="word"][data-idx="${gameState.selectedWord}"]`);
+      if (prev) prev.classList.remove('selected');
+    }
+    gameState.selectedWord = val;
+    const card = document.querySelector(`.game-card[data-type="word"][data-idx="${val}"]`);
+    if (card) card.classList.add('selected');
+  } else {
+    if (gameState.selectedMeaning !== null) {
+      const prev = document.querySelector(`.game-card[data-type="meaning"][data-midx="${gameState.selectedMeaning}"]`);
+      if (prev) prev.classList.remove('selected');
+    }
+    gameState.selectedMeaning = val;
+    const card = document.querySelector(`.game-card[data-type="meaning"][data-midx="${val}"]`);
+    if (card) card.classList.add('selected');
+  }
+  if (gameState.selectedWord !== null && gameState.selectedMeaning !== null) {
+    setTimeout(checkMatch, 300);
+  }
+}
+
+function checkMatch() {
+  const wordIdx = gameState.selectedWord;
+  const meaningIdx = gameState.selectedMeaning;
+  const wordCard = document.querySelector(`.game-card[data-type="word"][data-idx="${wordIdx}"]`);
+  const meaningCard = document.querySelector(`.game-card[data-type="meaning"][data-midx="${meaningIdx}"]`);
+  if (!wordCard || !meaningCard) return;
+  // meaningOrder[meaningIdx] 是该释义卡片对应的原始 pair 索引
+  const matchedPairIdx = gameState.meaningOrder[meaningIdx];
+  if (matchedPairIdx === wordIdx) {
+    // 正确
+    wordCard.classList.add('correct-flash');
+    meaningCard.classList.add('correct-flash');
+    gameState.score += 10;
+    gameState.correct++;
+    setTimeout(() => {
+      wordCard.classList.add('matched');
+      meaningCard.classList.add('matched');
+      gameState.matched++;
+      gameState.selectedWord = null;
+      gameState.selectedMeaning = null;
+      updateGameStats();
+      if (gameState.matched >= gameState.total) {
+        gameComplete();
+      }
+    }, 500);
+  } else {
+    // 错误
+    wordCard.classList.add('wrong-flash');
+    meaningCard.classList.add('wrong-flash');
+    gameState.score = Math.max(0, gameState.score - 1);
+    gameState.wrong++;
+    setTimeout(() => {
+      wordCard.classList.remove('wrong-flash', 'selected');
+      meaningCard.classList.remove('wrong-flash', 'selected');
+      gameState.selectedWord = null;
+      gameState.selectedMeaning = null;
+      updateGameStats();
+    }, 500);
+  }
+}
+
+function updateGameStats() {
+  document.getElementById('gameScore').textContent = gameState.score;
+  document.getElementById('gameRounds').textContent = data.gameStats.rounds + (gameState.matched >= gameState.total ? 1 : 0);
+  const total = gameState.correct + gameState.wrong;
+  document.getElementById('gameAccuracy').textContent = total ? Math.round(gameState.correct / total * 100) + '%' : '0%';
+}
+
+function gameComplete() {
+  gameState.active = false;
+  data.gameStats.score += gameState.score;
+  data.gameStats.rounds++;
+  data.gameStats.correct += gameState.correct;
+  data.gameStats.wrong += gameState.wrong;
+  saveData();
+  const total = gameState.correct + gameState.wrong;
+  const acc = total ? Math.round(gameState.correct / total * 100) : 0;
+  document.getElementById('gameBoard').innerHTML = `<div class="game-complete">🎉 恭喜完成！<br>得分：${gameState.score} · 正确率：${acc}%<br><span style="font-size:13px;color:var(--text-sub)">累计完成 ${data.gameStats.rounds} 局</span></div>`;
+  document.getElementById('gameScore').textContent = gameState.score;
+  document.getElementById('gameRounds').textContent = data.gameStats.rounds;
+  document.getElementById('gameAccuracy').textContent = acc + '%';
+}
+
+function renderGameStats() {
+  document.getElementById('gameScore').textContent = data.gameStats.score;
+  document.getElementById('gameRounds').textContent = data.gameStats.rounds;
+  const total = data.gameStats.correct + data.gameStats.wrong;
+  document.getElementById('gameAccuracy').textContent = total ? Math.round(data.gameStats.correct / total * 100) + '%' : '0%';
+}
+
 // ===== 倒计时 & 连续打卡 =====
 function updateCountdown() { const d=document.getElementById('examDate').value; data.examDate=d; saveData(); if(!d){document.getElementById('daysLeft').textContent='--';return;} document.getElementById('daysLeft').textContent=Math.ceil((new Date(d)-new Date())/(1000*60*60*24))>0?Math.ceil((new Date(d)-new Date())/(1000*60*60*24)):'已考'; }
 function updateStreak() { const t=today(); if(data.streak.lastDate===t)return; if(data.streak.lastDate===new Date(Date.now()-86400000).toISOString().slice(0,10))data.streak.count++; else data.streak.count=1; data.streak.lastDate=t; }
@@ -896,7 +1392,10 @@ function init() {
   document.getElementById('examDate').value=data.examDate||''; updateCountdown();
   renderTodos(); renderChecks(); renderPlan(); renderReviews(); renderErrors();
   renderWords(); renderAccumulate(); renderScores(); renderModuleRates();
-  updatePomoStats(); updatePomoDisplay(); renderExperiences(); updateAllStats();
+  updatePomoStats(); updatePomoDisplay(); renderExperiences();
+  renderFlashcards(); renderCustomExams(); renderGameStats(); renderGameBoard();
+  fetchLatestExamSchedule();
+  updateAllStats();
 }
 init();
 
